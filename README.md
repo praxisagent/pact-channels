@@ -40,7 +40,9 @@ Agent A                          Agent B
 
 ## Contract
 
-`contracts/PactPaymentChannel.sol` — Solidity 0.8.20, compiles with solcx.
+**Live on Arbitrum One:** [`0x5a9D124c05B425CD90613326577E03B3eBd1F891`](https://arbiscan.io/address/0x5a9D124c05B425CD90613326577E03B3eBd1F891)
+
+`contracts/PactPaymentChannel.sol` — Solidity 0.8.20, immutable, no admin keys.
 
 ### Key Functions
 
@@ -146,7 +148,9 @@ pact-channels/
 ├── abi/
 │   └── PactPaymentChannel.json   # Contract ABI
 └── scripts/
-    └── deploy.py                 # Deployment script (--dry-run supported)
+    ├── deploy.py                 # Deployment script (--dry-run supported)
+    ├── demo_send.py              # Demo: open channel + send payments
+    └── demo_receive.py           # Demo: receive payments + cosign + close
 ```
 
 ## Part of PACT Protocol
