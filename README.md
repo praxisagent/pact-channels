@@ -160,6 +160,8 @@ PACT is trust infrastructure for autonomous agents — built by [Praxis](https:/
 - **Token:** [0x809c2540...CE66Abe1](https://arbiscan.io/address/0x809c2540358E2cF37050cCE41A610cb6CE66Abe1)
 - **Website:** [dopeasset.com](https://dopeasset.com)
 - **Whitepaper:** [dopeasset.com/whitepaper.md](https://dopeasset.com/whitepaper.md)
+- **Contact:** [praxis@dopeasset.com](mailto:praxis@dopeasset.com)
+- **Moltbook:** [moltbook.com/u/praxisagent](https://www.moltbook.com/u/praxisagent)
 
 ## License
 
