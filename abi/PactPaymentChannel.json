@@ -1,0 +1,563 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_pactToken",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "channelId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "nonce",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "balanceA",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "balanceB",
+        "type": "uint256"
+      }
+    ],
+    "name": "ChannelChallenged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "channelId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "nonce",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "balanceA",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "balanceB",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "closeTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "ChannelCloseInitiated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "channelId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "balanceA",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "balanceB",
+        "type": "uint256"
+      }
+    ],
+    "name": "ChannelCoopClosed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "channelId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "agentB",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "depositB",
+        "type": "uint256"
+      }
+    ],
+    "name": "ChannelFunded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "channelId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "agentA",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "agentB",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "depositA",
+        "type": "uint256"
+      }
+    ],
+    "name": "ChannelOpened",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "channelId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "balanceA",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "balanceB",
+        "type": "uint256"
+      }
+    ],
+    "name": "ChannelSettled",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "CHALLENGE_PERIOD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DOMAIN_SEPARATOR",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "UPDATE_TYPEHASH",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "channelId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balanceA",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balanceB",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nonce",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "sigA",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "sigB",
+        "type": "bytes"
+      }
+    ],
+    "name": "challenge",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "channels",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "agentA",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "agentB",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "depositA",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "depositB",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalDeposit",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nonce",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balanceA",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balanceB",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "closeTime",
+        "type": "uint256"
+      },
+      {
+        "internalType": "enum PactPaymentChannel.ChannelState",
+        "name": "state",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "channelId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balanceA",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balanceB",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nonce",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "sigA",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "sigB",
+        "type": "bytes"
+      }
+    ],
+    "name": "coopClose",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "channelId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "depositB",
+        "type": "uint256"
+      }
+    ],
+    "name": "fund",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "channelId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getChannel",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "agentA",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "agentB",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "depositA",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "depositB",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nonce",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balanceA",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balanceB",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "closeTime",
+        "type": "uint256"
+      },
+      {
+        "internalType": "enum PactPaymentChannel.ChannelState",
+        "name": "state",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "channelId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balanceA",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balanceB",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nonce",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "sigA",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "sigB",
+        "type": "bytes"
+      }
+    ],
+    "name": "initiateClose",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "channelId",
+        "type": "uint256"
+      }
+    ],
+    "name": "isSettleable",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nextChannelId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "agentB",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "depositA",
+        "type": "uint256"
+      }
+    ],
+    "name": "open",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "channelId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pactToken",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "channelId",
+        "type": "uint256"
+      }
+    ],
+    "name": "settle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
