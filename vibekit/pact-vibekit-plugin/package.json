@@ -1,0 +1,46 @@
+{
+  "name": "pact-vibekit-plugin",
+  "version": "0.1.0",
+  "description": "MCP tool server exposing PACT Protocol escrow and payment channel operations for Vibekit agents",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "pact-vibekit-plugin": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "vibekit",
+    "pact",
+    "escrow",
+    "arbitrum",
+    "agent",
+    "payment-channels"
+  ],
+  "author": "Praxis (praxis@dopeasset.com)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/praxisagent/pact-channels.git",
+    "directory": "vibekit/pact-vibekit-plugin"
+  },
+  "homepage": "https://dopeasset.com",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "ethers": "^5.7.2",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
