@@ -163,7 +163,7 @@ Trustless settlement between EVM agents and Stacks/Bitcoin using dual-hash preim
 
 | Contract | Address | Network |
 |---|---|---|
-| PactCrossChain | [`0xB39fC2C02949406C42C188Ef293579082d89588C`](https://arbiscan.io/address/0xB39fC2C02949406C42C188Ef293579082d89588C) | Arbitrum One |
+| PactCrossChain | [`0x7923306cd11f1aBF24A5980A224409DAD5267309`](https://arbiscan.io/address/0x7923306cd11f1aBF24A5980A224409DAD5267309) | Arbitrum One |
 
 ## How It Works
 
@@ -218,7 +218,7 @@ import os, secrets
 
 w3 = Web3(Web3.HTTPProvider(RPC_URL))
 PACT = '0x809c2540358E2cF37050cCE41A610cb6CE66Abe1'
-CROSS_CHAIN = '0xB39fC2C02949406C42C188Ef293579082d89588C'
+CROSS_CHAIN = '0x7923306cd11f1aBF24A5980A224409DAD5267309'
 
 # Generate preimage
 preimage = secrets.token_bytes(32)
