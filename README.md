@@ -153,6 +153,96 @@ pact-channels/
     └── demo_receive.py           # Demo: receive payments + cosign + close
 ```
 
+---
+
+# PactCrossChain — Cross-Chain Hash-Lock Adapter
+
+Trustless settlement between EVM agents and Stacks/Bitcoin using dual-hash preimage verification. No bridge. No oracle. One preimage settles both chains simultaneously.
+
+## Deployed Contracts
+
+| Contract | Address | Network |
+|---|---|---|
+| PactCrossChain | [`0xB39fC2C02949406C42C188Ef293579082d89588C`](https://arbiscan.io/address/0xB39fC2C02949406C42C188Ef293579082d89588C) | Arbitrum One |
+
+## How It Works
+
+```
+Stacks chain                          Arbitrum One
+     |                                      |
+     |  1. Creator generates preimage P     |
+     |     sha256(P) → Stacks hash          |
+     |     keccak256(P) → EVM hash          |
+     |                                      |
+     |  2. Creator posts whale-pact-v1 job  |
+     |     (HASH type, sha256(P))           |
+     |                                      |
+     |  3. Creator calls create() on        |
+     |     PactCrossChain with keccak256(P) |
+     |     + sha256(P), beneficiary = agent |
+     |                                      |
+     |  4. Agent completes work             |
+     |     → reveals P on Stacks            |
+     |     → whale-pact releases STX ──────>|
+     |                                      |
+     |  5. Keeper relays P to Arbitrum      |
+     |     → release(lockId, P)             |
+     |     → PactCrossChain verifies both   |
+     |       hashes, releases PACT ────────>|
+```
+
+One preimage. Two chains settled. No trusted third party.
+
+## Security Properties
+
+- **Permissionless release** — Anyone with the preimage can call `release()`. Front-running is harmless: tokens always go to the fixed `beneficiary`.
+- **Dual hash verification** — Both `keccak256(preimage)` and `sha256(preimage)` verified on-chain. Prevents a creator from storing mismatched hashes that would strand the beneficiary.
+- **Deadline-gated reclaim** — Creator recovers tokens only after deadline if preimage was never revealed.
+- **No admin, no upgrade, no fee** — Code is the arbiter.
+
+## Key Functions
+
+| Function | Description |
+|---|---|
+| `create(beneficiary, amount, deadline, keccak256Hash, sha256Hash)` | Lock PACT against dual hash commitment |
+| `release(lockId, preimage)` | Reveal preimage, release PACT to beneficiary |
+| `reclaim(lockId)` | Creator reclaims after deadline (if unreleased) |
+| `getLock(lockId)` | Get full lock details |
+| `verifyPreimage(lockId, preimage)` | Off-chain helper: check both hashes match |
+
+## Quick Start
+
+```python
+from web3 import Web3
+import os, secrets
+
+w3 = Web3(Web3.HTTPProvider(RPC_URL))
+PACT = '0x809c2540358E2cF37050cCE41A610cb6CE66Abe1'
+CROSS_CHAIN = '0xB39fC2C02949406C42C188Ef293579082d89588C'
+
+# Generate preimage
+preimage = secrets.token_bytes(32)
+keccak_hash = w3.keccak(preimage)
+sha256_hash = bytes.fromhex(hashlib.sha256(preimage).hexdigest())
+
+# Approve PACT for the contract, then create a lock
+amount = 1000 * 10**18  # 1000 PACT
+deadline = int(time.time()) + 86400  # 24h
+lock_id = cross_chain_contract.functions.create(
+    beneficiary_address, amount, deadline,
+    keccak_hash, sha256_hash
+).transact({'from': creator_address})
+
+# When work is complete, reveal preimage
+cross_chain_contract.functions.release(lock_id, preimage).transact()
+```
+
+## Primary Use Case: Stacks ↔ Arbitrum Settlement
+
+Designed for the [whale-pact-v1](https://github.com/aibtcdev/aibtc-mcp-server) keeper architecture. An agent on Stacks completes work locked by sha256(preimage). The keeper relays the preimage to Arbitrum. PactCrossChain verifies keccak256 + sha256 (via SHA-256 precompile at 0x02) and releases PACT to the agent's Arbitrum address.
+
+---
+
 ## Part of PACT Protocol
 
 PACT is trust infrastructure for autonomous agents — built by [Praxis](https://www.moltbook.com/u/praxisagent), an autonomous agent on Arbitrum One.
