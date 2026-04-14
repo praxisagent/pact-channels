@@ -1,0 +1,73 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: PactPaymentChannel
+    network: arbitrum-one
+    source:
+      address: "0x5a9D124c05B425CD90613326577E03B3eBd1F891"
+      abi: PactPaymentChannel
+      startBlock: 439762277
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - PaymentChannel
+        - Protocol
+      abis:
+        - name: PactPaymentChannel
+          file: ./abis/PactPaymentChannel.json
+      eventHandlers:
+        - event: ChannelOpened(indexed uint256,indexed address,indexed address,uint256)
+          handler: handleChannelOpened
+        - event: ChannelFunded(indexed uint256,indexed address,uint256)
+          handler: handleChannelFunded
+        - event: ChannelCoopClosed(indexed uint256,uint256,uint256)
+          handler: handleChannelCoopClosed
+        - event: ChannelCloseInitiated(indexed uint256,uint256,uint256,uint256,uint256)
+          handler: handleChannelCloseInitiated
+        - event: ChannelChallenged(indexed uint256,uint256,uint256,uint256)
+          handler: handleChannelChallenged
+        - event: ChannelSettled(indexed uint256,uint256,uint256)
+          handler: handleChannelSettled
+
+
+      file: ./src/channel-mappings.ts
+  - kind: ethereum
+    name: PactEscrowV2
+    network: arbitrum-one
+    source:
+      address: "0x220B97972d6028Acd70221890771E275e7734BFB"
+      abi: PactEscrowV2
+      startBlock: 439912433
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Pact
+        - PactHistoryEvent
+        - Protocol
+      abis:
+        - name: PactEscrowV2
+          file: ./abis/PactEscrowV2.json
+      eventHandlers:
+        - event: PactCreated(indexed uint256,indexed address,indexed address,address,uint256,uint256,uint256,uint256,uint256)
+          handler: handlePactCreated
+        - event: WorkSubmitted(indexed uint256,indexed address,bytes32)
+          handler: handleWorkSubmitted
+        - event: PactApproved(indexed uint256,indexed address)
+          handler: handlePactApproved
+        - event: PactDisputed(indexed uint256,indexed address)
+          handler: handlePactDisputed
+        - event: PactReleased(indexed uint256,indexed address,uint256)
+          handler: handlePactReleased
+        - event: PactRefunded(indexed uint256,indexed address,uint256)
+          handler: handlePactRefunded
+        - event: ArbitrationRuled(indexed uint256,indexed address,bool)
+          handler: handleArbitrationRuled
+        - event: ArbitrationFinalized(indexed uint256)
+          handler: handleArbitrationFinalized
+      file: ./src/escrow-mappings.ts

@@ -1,0 +1,16 @@
+{
+  "name": "pact-protocol-subgraph",
+  "version": "1.0.0",
+  "description": "The Graph subgraph for PACT Protocol — indexes PactEscrow v2 and PactPaymentChannel on Arbitrum One",
+  "license": "MIT",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy:studio": "graph deploy --studio pact-protocol",
+    "deploy:hosted": "graph deploy --product hosted-service praxisagent/pact-protocol"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.73.0",
+    "@graphprotocol/graph-ts": "^0.35.1"
+  }
+}

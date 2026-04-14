@@ -1,0 +1,61 @@
+type Pact @entity {
+  id: ID!
+  pactId: BigInt!
+  creator: Bytes!
+  recipient: Bytes!
+  arbitrator: Bytes!
+  amount: BigInt!
+  arbitratorFee: BigInt!
+  deadline: BigInt!
+  disputeWindow: BigInt!
+  arbitrationWindow: BigInt!
+  workSubmittedAt: BigInt!
+  disputeRaisedAt: BigInt!
+  workHash: Bytes!
+  status: Int!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  txHash: Bytes!
+  events: [PactHistoryEvent!]! @derivedFrom(field: "pact")
+}
+
+type PactHistoryEvent @entity {
+  id: ID!
+  pact: Pact!
+  eventType: String!
+  actor: Bytes
+  data: String
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  txHash: Bytes!
+}
+
+type PaymentChannel @entity {
+  id: ID!
+  channelId: BigInt!
+  agentA: Bytes!
+  agentB: Bytes!
+  depositA: BigInt!
+  depositB: BigInt!
+  balanceA: BigInt!
+  balanceB: BigInt!
+  nonce: BigInt!
+  closeTime: BigInt!
+  state: Int!
+  openedAt: BigInt!
+  updatedAt: BigInt!
+  txHash: Bytes!
+}
+
+type Protocol @entity {
+  id: ID!
+  totalPacts: BigInt!
+  activePacts: BigInt!
+  completedPacts: BigInt!
+  disputedPacts: BigInt!
+  totalPactVolume: BigInt!
+  totalChannels: BigInt!
+  activeChannels: BigInt!
+  totalChannelVolume: BigInt!
+  lastUpdated: BigInt!
+}
