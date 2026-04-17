@@ -1,0 +1,115 @@
+{
+  "_comment": "KeeperHub Workflow — PACT Protocol Auto-Release Keeper",
+  "_description": "Monitors PactEscrow v2 on Arbitrum One. When isReleaseable() returns true, automatically calls release() to pay the worker. No human intermediary required.",
+  "_ethglobal_track": "KeeperHub — $5,000",
+
+  "name": "PACT Auto-Release Keeper",
+  "description": "Automatically releases PACT escrow payments when the dispute window has elapsed and work has been submitted. Enables fully trustless agent-to-agent commerce.",
+  "chain": "arbitrum-one",
+  "chain_id": 42161,
+
+  "contracts": {
+    "PactEscrowV2": {
+      "address": "0x220B97972d6028Acd70221890771E275e7734BFB",
+      "abi_functions": [
+        {
+          "name": "isReleaseable",
+          "type": "view",
+          "inputs": [{"name": "pactId", "type": "uint256"}],
+          "outputs": [{"name": "", "type": "bool"}]
+        },
+        {
+          "name": "release",
+          "type": "nonpayable",
+          "inputs": [{"name": "pactId", "type": "uint256"}],
+          "outputs": []
+        },
+        {
+          "name": "getPact",
+          "type": "view",
+          "inputs": [{"name": "pactId", "type": "uint256"}],
+          "outputs": [{"name": "", "type": "tuple"}]
+        },
+        {
+          "name": "nextPactId",
+          "type": "view",
+          "inputs": [],
+          "outputs": [{"name": "", "type": "uint256"}]
+        }
+      ]
+    }
+  },
+
+  "trigger": {
+    "type": "schedule",
+    "cron": "*/5 * * * *",
+    "description": "Check every 5 minutes"
+  },
+
+  "workflow_nodes": [
+    {
+      "id": "scan_pacts",
+      "type": "web3_read",
+      "description": "Get the current nextPactId to know how many pacts exist",
+      "contract": "PactEscrowV2",
+      "function": "nextPactId",
+      "inputs": [],
+      "output_var": "total_pacts"
+    },
+    {
+      "id": "check_releaseable",
+      "type": "loop",
+      "description": "For each pactId from 0 to total_pacts-1, check isReleaseable()",
+      "iterate": "range(0, total_pacts)",
+      "loop_var": "pactId",
+      "nodes": [
+        {
+          "id": "is_releaseable_check",
+          "type": "web3_read",
+          "contract": "PactEscrowV2",
+          "function": "isReleaseable",
+          "inputs": [{"value": "{{pactId}}"}],
+          "output_var": "releaseable"
+        },
+        {
+          "id": "condition_gate",
+          "type": "condition",
+          "condition": "releaseable == true",
+          "if_true": "execute_release",
+          "if_false": "continue_loop"
+        },
+        {
+          "id": "execute_release",
+          "type": "web3_write",
+          "description": "Call release(pactId) — permissionless, callable by anyone after dispute window",
+          "contract": "PactEscrowV2",
+          "function": "release",
+          "inputs": [{"value": "{{pactId}}"}],
+          "gas_limit": 100000,
+          "output_var": "tx_hash"
+        },
+        {
+          "id": "log_release",
+          "type": "log",
+          "message": "Released pactId={{pactId}} — tx={{tx_hash}}"
+        }
+      ]
+    }
+  ],
+
+  "execution_notes": {
+    "why_release_not_approve": "approve() requires msg.sender == creator (opt-in approval). release() is permissionless — callable by anyone after disputeWindow elapses. Keepers use release().",
+    "dispute_window": "Configured per-pact at creation time. Minimum is MIN_DISPUTE_WINDOW (contract constant). After this window, the creator's option to dispute expires and payment is guaranteed to the worker.",
+    "gas_cost_estimate": "~50,000 gas per release() call. At 0.1 gwei on Arbitrum: ~$0.0002 per automated settlement.",
+    "trust_model": "Zero. No keeper key has access to funds. release() only transfers what is already locked in escrow to the pre-designated recipient. Keeper cannot redirect funds."
+  },
+
+  "demo_flow": {
+    "step_1": "Employer agent calls PactEscrow.create(workerAddr, 0x0, 100 PACT, 0, deadline, 3600, 0) — creates escrow with 1hr dispute window",
+    "step_2": "Worker agent delivers work, calls PactEscrow.submitWork(pactId, sha256(workContent)) — commits hash on-chain",
+    "step_3": "Clock runs — 1 hour passes",
+    "step_4": "KeeperHub keeper runs, calls isReleaseable(pactId) — returns true",
+    "step_5": "Keeper calls release(pactId) — 100 PACT transfers to worker",
+    "step_6": "Worker has been paid. No human touched the approve button."
+  }
+}
