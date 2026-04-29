@@ -17,15 +17,17 @@ Adversarial test manifests for SWORN x PACT Protocol Pact #16 engagement.
 | AT-05 | `adversarial/at-05-missing-required.json` | Missing e2e_run_id | Reject: missing required field |
 | AT-06 | relay-side (Alex controls) | Post-deadline attestation | Relay refuses submitWork past pact deadline |
 | AT-07 | relay-side (Alex controls) | Wrong EIP-191 signer key | Relay signature verification fails |
-| AT-08 | `adversarial/at-08-wrong-address.json` | Wrong contract_address | Reject: address != on-chain PactEscrow v2 |
+| AT-08 | `adversarial/at-08-wrong-address.json` | Wrong contract_address | Reject: address \!= on-chain PactEscrow v2 |
 | AT-09 | `adversarial/at-09-canonical-divergence.json` | Wrong claimed workhash in email | Three-way check detects mismatch |
-| AT-10 | relay-side or TBD | zero-address bytecode sentinel | Reject via sentinel check |
+| AT-10 | `adversarial/at-10-unknown-spec-version.json` | spec_version: 999.0.0 | Reject: unknown spec version (forward-compat guard) |
 
 ## Manifest Adversarial Content
 
 Each manifest in this folder is a deliberately malformed version of a valid Pact #16 watcher_run_manifest. Each file contains a `_adversarial_test` field describing the injection.
 
 **AT-04 verification:** keccak256(strict_strip(at-04-extra-fields.json)) == keccak256(strict_strip(at-clean-base-reference.json)) — verified in generation script.
+
+**AT-10 rationale:** Zero-address bytecode sentinel is fully covered by AT-08 (whitelist enforcement is identical). AT-10 instead tests spec_version forward-compat: a watcher receiving a manifest with an unrecognised spec_version should refuse pre-broadcast. This covers a distinct failure class not reachable via AT-01..AT-09.
 
 **Clean reference workhash (base structure):** `0x15910c74edbb5327478de30e3e681fe4063ae13f632753fa8c705f118b2a1641`
 
