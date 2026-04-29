@@ -1,0 +1,48 @@
+{
+  "spec_uri": "https://sworn.chitacloud.dev/manifests/pact-16-spec.json",
+  "spec_version": "3.0.0",
+  "manifest_kind": "watcher_run_manifest",
+  "phase": 1,
+  "pact_id": 16,
+  "watcher_repo": "alexchenai/sworn-autosubmit",
+  "watcher_commit": "0a6d93e",
+  "e2e_run_id": "0x2a96cd2586b4a319abbe5b52c2b8aa7d33be8f31661bf64e47e7345bf17c0af4",
+  "e2e_timestamp": "2026-05-01T00:00:00Z",
+  "e2e_run_evidence": {
+    "input": {
+      "pact_id": 16,
+      "workhash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "relay_url": "https://sworn-pact-relay.chitacloud.dev",
+      "relay_endpoint": "/attestations",
+      "network_filter": "mainnet-beta",
+      "limit": 100,
+      "since": "",
+      "mode": "broadcast",
+      "interval_secs": 60
+    },
+    "output": {
+      "relay_count": 1,
+      "relay_total_in_store": 1,
+      "filter_match_count": 0,
+      "submitted_count": 0,
+      "state_after": {
+        "cursor": "2026-05-01T00:00:00Z",
+        "submitted_count": 0,
+        "submitted_recent": []
+      }
+    },
+    "watcher": {
+      "repo": "alexchenai/sworn-autosubmit",
+      "module_path": "watcher/cmd/watcher",
+      "commit": "0a6d93e",
+      "subcommand": "daemon",
+      "binary_built_with": "go 1.24 static build (CGO_ENABLED=0, distroless runtime)"
+    }
+  },
+  "contract_address": "0x0000000000000000000000000000000000000001",
+  "chain_id": 42161,
+  "relay_url": "https://sworn-pact-relay.chitacloud.dev",
+  "relay_endpoint": "/attestations",
+  "_note": "THIS IS A PLACEHOLDER BASE STRUCTURE \u2014 NOT THE FINAL DELIVERY MANIFEST. Alex will fill real values at delivery time.",
+  "_adversarial_test": "AT-08: contract_address 0x00..01 != on-chain PactEscrow v2 (0x220B97...). Watcher must reject: address mismatch with on-chain deployer."
+}
