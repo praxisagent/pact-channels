@@ -1,6 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ethers } from 'ethers';
 import { z } from 'zod';
+import { createRequire } from 'module';
 import {
   CONTRACTS,
   ESCROW_ABI,
@@ -9,6 +10,28 @@ import {
   PACT_STATUS,
   CHANNEL_STATE,
 } from './contracts.js';
+
+// sworn-verifier ships as CommonJS; createRequire keeps NodeNext + ESM happy.
+const _require = createRequire(import.meta.url);
+const swornVerifier = _require('sworn-verifier') as {
+  evaluateManifestObject: (
+    manifest: unknown,
+    sourceUrl?: string,
+  ) => {
+    url: string;
+    configured: boolean;
+    fetched_at: string;
+    status_code: number;
+    allow: boolean;
+    spec_version: string;
+    stripped_hash: string;
+    reason: string;
+  };
+};
+
+const ZERO_HASH =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+
 
 // ──────────────────── Helpers ─────────────────────────────────
 
@@ -298,6 +321,133 @@ export function createServer(rpcUrl: string): McpServer {
       );
       return { content: [{ type: 'text', text: JSON.stringify(tx, null, 2) }] };
     }
+  );
+
+  // ── Write: Build submit_work_verified transaction ─────────
+  // Submitter-side companion to the vibekit pact_submit_work_verified tool
+  // (PR #1). Evaluates the manifest with sworn-verifier ^0.1.0 BEFORE
+  // encoding the on-chain submitWork call. Refuses with no transaction
+  // payload if the manifest is malformed or fails strict verification.
+  server.tool(
+    'pact_build_submit_work_verified',
+    'Build a transaction for the recipient to submit a verified work hash to a PACT escrow. The manifest is parsed and evaluated by sworn-verifier; if it does not pass the strict spec checks, no on-chain transaction is built and a refusal record is returned. On success, returns calldata that calls submitWork(pactId, decision.stripped_hash) on PactEscrow v2 plus the full sworn-verifier decision object for audit.',
+    {
+      pactId: z.number().describe('The escrow pact ID to submit work for. Must currently have status=Active and on-chain workHash=0x000... (not yet submitted).'),
+      manifestUrl: z.string().describe('URL of the SWORN manifest. Recorded verbatim in the decision object for audit; not refetched (the manifest content is supplied via workProduct).'),
+      workProduct: z.string().describe('The full manifest content as a JSON string. Will be parsed and evaluated by sworn-verifier.evaluateManifestObject().'),
+      rpcUrl: z.string().optional().describe('Optional RPC URL for the on-chain pre-flight workHash check. Defaults to the active CHAINS rpcUrl. Set to empty string to skip the on-chain check entirely.'),
+    },
+    async ({ pactId, manifestUrl, workProduct, rpcUrl }) => {
+      // 1. Parse manifest
+      let manifest: unknown;
+      try {
+        manifest = JSON.parse(workProduct);
+      } catch (err) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  refused: true,
+                  reason: 'manifest_invalid_json',
+                  decision: null,
+                  error: err instanceof Error ? err.message : String(err),
+                },
+                null,
+                2,
+              ),
+            },
+          ],
+        };
+      }
+
+      // 2. Evaluate via sworn-verifier — refuse with the verifier reason verbatim if disallowed
+      const decision = swornVerifier.evaluateManifestObject(manifest, manifestUrl);
+      if (!decision.allow) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  refused: true,
+                  reason: decision.reason,
+                  decision,
+                },
+                null,
+                2,
+              ),
+            },
+          ],
+        };
+      }
+
+      // 3. Optional on-chain pre-flight: refuse if work has already been submitted
+      //    (idempotency guard — submitWork can only be called once per pact).
+      //    Skipped if rpcUrl is explicitly empty string.
+      let preflight: { skipped?: string; on_chain_hash?: string } = {};
+      const skipPreflight = rpcUrl === '';
+      if (!skipPreflight) {
+        const finalRpc = (typeof rpcUrl === 'string' && rpcUrl.length > 0)
+          ? rpcUrl
+          : 'https://arb1.arbitrum.io/rpc';
+        try {
+          const escrow = new ethers.Contract(
+            CONTRACTS.PACT_ESCROW,
+            ESCROW_ABI,
+            new ethers.JsonRpcProvider(finalRpc),
+          );
+          const raw: any = await (escrow as any)['getPact'](pactId);
+          // PactEscrowV2.getPact tuple field order: ..., workHash @ index 10, status @ index 11
+          const onChainHash = (raw?.workHash ?? raw?.[10] ?? ZERO_HASH).toString().toLowerCase();
+          preflight = { on_chain_hash: onChainHash };
+          if (onChainHash !== ZERO_HASH) {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(
+                    {
+                      refused: true,
+                      reason: 'work_already_submitted',
+                      decision,
+                      on_chain_hash: onChainHash,
+                      computed_hash: (decision.stripped_hash || '').toLowerCase(),
+                      match:
+                        onChainHash ===
+                        (decision.stripped_hash || '').toLowerCase(),
+                    },
+                    null,
+                    2,
+                  ),
+                },
+              ],
+            };
+          }
+        } catch (err) {
+          preflight = { skipped: err instanceof Error ? err.message : String(err) };
+        }
+      } else {
+        preflight = { skipped: 'rpc_disabled_by_caller' };
+      }
+
+      // 4. Encode submitWork(pactId, stripped_hash) on PactEscrow v2
+      const iface = new ethers.Interface(ESCROW_ABI);
+      const data = iface.encodeFunctionData('submitWork', [pactId, decision.stripped_hash]);
+      const tx = buildTx(
+        CONTRACTS.PACT_ESCROW,
+        data,
+        `Submit verified work hash ${decision.stripped_hash} for pact ${pactId} (must be called by the pact recipient)`,
+      );
+
+      const result = {
+        ...tx,
+        decision,
+        preflight,
+      };
+      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+    },
   );
 
   // ── Write: Build open channel transaction ─────────────────
