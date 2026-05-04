@@ -34,6 +34,7 @@ import {
   buildCoopClose,
   getChannelStatus,
 } from './channel.js';
+import { submitWorkVerified } from './verify.js';
 import { RPC_URL_DEFAULT } from './constants.js';
 
 const RPC_URL = process.env.RPC_URL ?? RPC_URL_DEFAULT;
@@ -164,6 +165,20 @@ const TOOLS: Tool[] = [
       required: ['channelId'],
     },
   },
+  {
+    name: 'submit_work_verified',
+    description:
+      'Verify that a SWORN manifest at manifestUrl matches the workHash already submitted on-chain for pactId. Reads PactEscrow.pacts(pactId).workHash as the authoritative source, then recomputes the canonical stripped_hash from the manifest using sworn-verifier (byte-compatible JS port of the reference Go and Python implementations). Refuses if (a) on-chain workHash is zero (submitWork has not been called), (b) the pact is not in WorkSubmitted/Approved/Released state, (c) the manifest itself is refused by sworn-verifier, or (d) the recomputed hash diverges from the on-chain hash. No on-chain transaction is broadcast — this is a read-only pre-approve verification gate intended for an approver wallet about to call PactEscrow.approve(pactId).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        pactId: { type: 'string', description: 'The escrow pact ID to verify (e.g. "16")' },
+        manifestUrl: { type: 'string', description: 'HTTPS URL of the SWORN manifest JSON to evaluate' },
+        fetchTimeoutMs: { type: 'number', description: 'Optional fetch timeout in milliseconds (default 15000)' },
+      },
+      required: ['pactId', 'manifestUrl'],
+    },
+  },
 ];
 
 // Server setup
@@ -236,6 +251,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'get_channel_status': {
         const result = await getChannelStatus({
           channelId: (args as { channelId: string }).channelId,
+          rpcUrl: RPC_URL,
+        });
+        return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      }
+
+      case 'submit_work_verified': {
+        const a = args as { pactId: string; manifestUrl: string; fetchTimeoutMs?: number };
+        const result = await submitWorkVerified({
+          pactId: a.pactId,
+          manifestUrl: a.manifestUrl,
+          fetchTimeoutMs: a.fetchTimeoutMs,
           rpcUrl: RPC_URL,
         });
         return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };

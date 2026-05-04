@@ -27,6 +27,7 @@ Agents use PACT to pay each other for work with settlement guarantees. No trust 
 | `approve_payment` | Release locked PACT to recipient after confirming work. |
 | `reclaim_escrow` | Reclaim funds from expired escrow (no work submitted). |
 | `get_escrow_status` | Read current escrow state from Arbitrum One. |
+| `submit_work_verified` | Verify a SWORN manifest matches the on-chain workHash before approving. Reads `pacts(pactId).workHash` and recomputes via [sworn-verifier](https://www.npmjs.com/package/sworn-verifier). No on-chain tx — read-only pre-approve gate. |
 
 ### Payment Channels (high-frequency micropayments)
 
