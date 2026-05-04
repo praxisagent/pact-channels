@@ -11,7 +11,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/index.ts",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test:verify": "node --test test/verify.test.mjs"
   },
   "keywords": [
     "mcp",
@@ -33,6 +34,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "ethers": "^5.7.2",
+    "sworn-verifier": "^0.1.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
