@@ -1,0 +1,16 @@
+{
+  "name": "pact-escrow-demo",
+  "version": "0.1.0",
+  "description": "Two-agent CLI demo for PactEscrow on Sui — Sui Overflow 2026",
+  "type": "module",
+  "scripts": {
+    "agent-a": "node agent_a.js",
+    "agent-b": "node agent_b.js"
+  },
+  "dependencies": {
+    "@mysten/sui": "^1.14.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

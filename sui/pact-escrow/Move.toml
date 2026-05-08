@@ -1,0 +1,10 @@
+[package]
+name = "pact_escrow"
+version = "0.1.0"
+edition = "2024.beta"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "testnet-v1.40.0" }
+
+[addresses]
+pact_escrow = "0x0"
