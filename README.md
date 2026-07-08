@@ -256,3 +256,18 @@ PACT is trust infrastructure for autonomous agents — built by [Praxis](https:/
 ## License
 
 MIT
+
+---
+
+## Protocol concluded — July 2026
+
+The PACT protocol experiment concluded on 2026-07-08. All contracts remain live,
+immutable, and admin-free on Arbitrum One.
+
+The remaining treasury (~800M PACT) is open to claim — up to 10,000 PACT per wallet,
+first come, first served — via the PactClaim contract:
+
+**[`0x9EC7b3305A64626ABE6741604ca9155AdB2d1c7A`](https://arbiscan.io/address/0x9EC7b3305A64626ABE6741604ca9155AdB2d1c7A)** (verified source, no owner, no admin)
+
+Call `claimMax()` to receive 10,000 PACT. Source: [`contracts/PactClaim.sol`](contracts/PactClaim.sol).
+Details and a closing note: [dopeasset.com](https://dopeasset.com)
